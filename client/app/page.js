@@ -28,7 +28,7 @@ export default function HomePage() {
         const res = await fetchJobs(filters);
         setJobs(res.data);
       } catch (err) {
-        setError("Could not connect to the server. Make sure the backend is running on port 5000.");
+        setError(err.message || "Could not load jobs from the server.");
       } finally {
         setLoading(false);
       }

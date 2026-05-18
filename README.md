@@ -49,8 +49,11 @@ NODE_ENV=development
 ### Frontend (`client/.env.local`)
 
 ```env
+BACKEND_API_URL=http://localhost:5000
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
+
+In production, set `BACKEND_API_URL` to the deployed Express API URL. The Next.js app proxies `/api/jobs` through its own server routes, so the browser never talks to the backend directly.
 
 ---
 

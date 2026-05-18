@@ -1,4 +1,29 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+async function request(path, options = {}) {
+  const res = await fetch(path, {
+    cache: "no-store",
+    ...options,
+  });
+
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+  const body = isJson ? await res.json().catch(() => null) : await res.text();
+
+  if (!res.ok) {
+    const message = isJson && body?.message
+      ? body.message
+      : typeof body === "string" && body.trim()
+        ? body
+        : "Request failed";
+
+    throw new Error(message);
+  }
+
+  if (!isJson) {
+    throw new Error("Expected JSON response from the API");
+  }
+
+  return body;
+}
 
 export async function fetchJobs(filters = {}) {
   const params = new URLSearchParams();
@@ -6,44 +31,30 @@ export async function fetchJobs(filters = {}) {
   if (filters.status) params.append("status", filters.status);
   if (filters.search) params.append("search", filters.search);
 
-  const res = await fetch(`${API_URL}/api/jobs?${params.toString()}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to fetch jobs");
-  return res.json();
+  const queryString = params.toString();
+  return request(`/api/jobs${queryString ? `?${queryString}` : ""}`);
 }
 
 export async function fetchJob(id) {
-  const res = await fetch(`${API_URL}/api/jobs/${id}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch job");
-  return res.json();
+  return request(`/api/jobs/${id}`);
 }
 
 export async function createJob(data) {
-  const res = await fetch(`${API_URL}/api/jobs`, {
+  return request(`/api/jobs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.message || "Failed to create job");
-  return json;
 }
 
 export async function updateJobStatus(id, status) {
-  const res = await fetch(`${API_URL}/api/jobs/${id}`, {
+  return request(`/api/jobs/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.message || "Failed to update status");
-  return json;
 }
 
 export async function deleteJob(id) {
-  const res = await fetch(`${API_URL}/api/jobs/${id}`, { method: "DELETE" });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.message || "Failed to delete job");
-  return json;
+  return request(`/api/jobs/${id}`, { method: "DELETE" });
 }
