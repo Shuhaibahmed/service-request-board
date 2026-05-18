@@ -1,30 +1,31 @@
-# Frontend (Next.js)
+
+
+node_modules/
 .next/
 out/
-node_modules/
-.env.local
+dist/
+build/
+coverage/
+*.log
 
-# Backend (Node/Express)
+# Environment files
+.env
+.env.local
+.env.*
+!*.example
+
+# Next.js / frontend
+client/node_modules/
+client/.next/
+client/out/
+client/.turbo/
+client/.env.local
+
+# Backend
 server/node_modules/
-server/dist/
-server/logs/
 server/.env
 
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Env files
-.env
-.env.*
-
-# OS
+# OS / editor files
 .DS_Store
 Thumbs.db
-
-# Editor (optional)
 .vscode/

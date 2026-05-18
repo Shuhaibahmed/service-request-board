@@ -1,52 +1,56 @@
-/**
- * server.js
- * Entry point for the Service Board API.
- * - configures middleware
- * - connects to MongoDB
- * - mounts routes and global error handler
- */
-
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const jobRoutes = require('./routes/jobRoutes');
-const { errorHandler } = require('./middleware/errorMiddleware');
-
-// Load environment variables from .env file
+import dotenv from "dotenv";
 dotenv.config();
 
-// Create Express app
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import jobRoutes from "./routes/jobs.js";
+import { errorHandler, notFound } from "./middleware/errorHandler.js";
+
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
-connectDB();
+// Debug check - remove after confirming works
+console.log("ENV CHECK - MONGO_URI:", process.env.MONGO_URI ? "✅ Loaded" : "❌ NOT SET");
 
-// Built-in middleware to parse JSON
+// Middleware
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:3001"],
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
-
-// Enable CORS for all origins (configure origin in production)
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 // Health check route
-app.get('/', (req, res) => {
-	res.json({ status: 'ok', message: 'Service Board API' });
+app.get("/", (req, res) => {
+  res.json({ message: "Service Request Board API is running 🚀", status: "OK" });
 });
 
-// API routes
-app.use('/api/jobs', jobRoutes);
+// API Routes
+app.use("/api/jobs", jobRoutes);
 
-// Global error handler (should be last middleware)
+// Error handling middleware (must be last)
+app.use(notFound);
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-	console.log(`Server listening on port ${PORT}`);
-});
+// Connect to MongoDB then start server
+const startServer = async () => {
+  try {
+    if (!process.env.MONGO_URI) {
+      throw new Error("❌ MONGO_URI is not set in .env file");
+    }
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-	console.info('SIGINT received. Shutting down server.');
-	server.close(() => process.exit(0));
-});
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server listening on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
