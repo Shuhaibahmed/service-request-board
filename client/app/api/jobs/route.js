@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// Normalize backend URL: remove trailing slash to prevent //api/jobs
+const raw = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const BACKEND_URL = raw.replace(/\/$/, "");
 
 async function proxyToBackend(path, options = {}) {
   const response = await fetch(`${BACKEND_URL}${path}`, {
