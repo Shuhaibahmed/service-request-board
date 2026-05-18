@@ -1,20 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { fetchJobs } from "../lib/api";
 import JobCard from "../components/JobCard";
 
 const CATEGORIES = ["All", "Plumbing", "Electrical", "Painting", "Joinery", "Cleaning", "Gardening", "Other"];
-const STATUSES = ["All", "Open", "In Progress", "Closed"];
 
 export default function HomePage() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [category, setCategory] = useState("All");
-  const [status, setStatus] = useState("All");
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -23,8 +19,6 @@ export default function HomePage() {
       try {
         const filters = {};
         if (category !== "All") filters.category = category;
-        if (status !== "All") filters.status = status;
-        if (search) filters.search = search;
         const res = await fetchJobs(filters);
         setJobs(res.data);
       } catch (err) {
@@ -33,117 +27,86 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-    load();
-  }, [category, status, search]);
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setSearch(searchInput);
-  };
+    load();
+  }, [category]);
 
   return (
-    <div>
-      {/* Hero */}
-      <div className="mb-10">
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-white mb-3">
-          Service Requests
-        </h1>
-        <p className="text-slate-400 text-lg">
-          Browse open jobs and connect with homeowners who need your skills.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">
+              Service requests
+            </p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+              Service requests board
+            </h1>
+            <p className="mt-4 text-lg leading-8 text-slate-600">
+              Browse requests, filter by category, and open a job to update its status or remove it.
+            </p>
+          </div>
 
-      {/* Search */}
-      <form onSubmit={handleSearchSubmit} className="mb-6 flex gap-2">
-        <input
-          type="text"
-          placeholder="Search jobs by keyword..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="input flex-1"
-        />
-        <button type="submit" className="btn-primary">Search</button>
-        {search && (
-          <button
-            type="button"
-            onClick={() => { setSearch(""); setSearchInput(""); }}
-            className="btn-secondary"
-          >
-            Clear
-          </button>
+          <div className="min-w-[220px] lg:w-[260px]">
+            <label className="mb-2 block text-sm font-medium text-slate-700">Category filter</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
+              {CATEGORIES.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex items-center justify-between gap-4">
+        {!loading && !error && (
+          <p className="text-sm text-slate-500">
+            {jobs.length} {jobs.length === 1 ? "request" : "requests"} found
+            {category !== "All" && ` in ${category}`}
+          </p>
         )}
-      </form>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-8">
-        <div>
-          <label className="block text-xs text-slate-500 mb-1 ml-1">Category</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="input py-2 pr-8 w-auto"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs text-slate-500 mb-1 ml-1">Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="input py-2 pr-8 w-auto"
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
       </div>
 
-      {/* Results count */}
-      {!loading && !error && (
-        <p className="text-slate-500 text-sm mb-5">
-          {jobs.length} {jobs.length === 1 ? "job" : "jobs"} found
-          {search && ` for "${search}"`}
-          {category !== "All" && ` in ${category}`}
-          {status !== "All" && ` • ${status}`}
-        </p>
-      )}
-
-      {/* States */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="card animate-pulse">
-              <div className="h-4 bg-slate-800 rounded w-1/3 mb-3" />
-              <div className="h-6 bg-slate-800 rounded w-4/5 mb-2" />
-              <div className="h-4 bg-slate-800 rounded w-full mb-1" />
-              <div className="h-4 bg-slate-800 rounded w-3/4 mb-4" />
-              <div className="h-3 bg-slate-800 rounded w-1/2" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className="card animate-pulse p-5">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="h-8 w-24 rounded-full bg-slate-100" />
+                <div className="h-7 w-20 rounded-full bg-slate-100" />
+              </div>
+              <div className="h-6 w-4/5 rounded bg-slate-100" />
+              <div className="mt-3 h-4 w-full rounded bg-slate-100" />
+              <div className="mt-2 h-4 w-11/12 rounded bg-slate-100" />
+              <div className="mt-5 h-4 w-2/3 rounded bg-slate-100" />
             </div>
           ))}
         </div>
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
-          <p className="text-red-400 font-semibold mb-1">⚠️ Connection Error</p>
-          <p className="text-slate-400 text-sm">{error}</p>
+        <div className="card border-rose-200 bg-rose-50 p-6 text-center">
+          <p className="mb-1 font-semibold text-rose-700">Connection Error</p>
+          <p className="text-sm text-slate-600">{error}</p>
         </div>
       )}
 
       {!loading && !error && jobs.length === 0 && (
-        <div className="text-center py-20">
-          <p className="text-5xl mb-4">🔍</p>
-          <h3 className="font-display font-bold text-xl text-slate-300 mb-2">No jobs found</h3>
-          <p className="text-slate-500">Try adjusting your filters or be the first to post a request.</p>
+        <div className="card py-16 text-center">
+          <h3 className="font-display text-2xl font-bold text-slate-900">No requests found</h3>
+          <p className="mt-2 text-slate-500">Try adjusting your filters or post the first request.</p>
+          <div className="mt-6">
+            <a href="/jobs/new" className="btn-primary">
+              Post a Request
+            </a>
+          </div>
         </div>
       )}
 
       {!loading && !error && jobs.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {jobs.map((job) => (
             <JobCard key={job._id} job={job} />
           ))}

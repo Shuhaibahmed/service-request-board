@@ -1,16 +1,6 @@
 import StatusBadge from "./StatusBadge";
 import Link from "next/link";
 
-const CATEGORY_ICONS = {
-  Plumbing: "🔧",
-  Electrical: "⚡",
-  Painting: "🎨",
-  Joinery: "🪚",
-  Cleaning: "🧹",
-  Gardening: "🌿",
-  Other: "🔨",
-};
-
 export default function JobCard({ job }) {
   const timeAgo = (date) => {
     const diff = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -22,33 +12,32 @@ export default function JobCard({ job }) {
 
   return (
     <Link href={`/jobs/${job._id}`}>
-      <div className="card cursor-pointer hover:shadow-lg hover:shadow-sky-500/5 group">
+      <div className="card cursor-pointer group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/80">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{CATEGORY_ICONS[job.category] || "🔨"}</span>
-            <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-md">
+            <span className="inline-flex h-9 items-center rounded-full bg-blue-50 px-3 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-100">
               {job.category || "Other"}
             </span>
           </div>
           <StatusBadge status={job.status} />
         </div>
 
-        <h2 className="font-display font-bold text-white text-lg mb-2 group-hover:text-sky-400 transition-colors line-clamp-2">
+        <h2 className="font-display text-lg font-bold text-slate-900 mb-2 transition-colors group-hover:text-blue-700 line-clamp-2">
           {job.title}
         </h2>
 
-        <p className="text-slate-400 text-sm line-clamp-2 mb-4">{job.description}</p>
+        <p className="text-sm leading-6 text-slate-600 line-clamp-2 mb-4">{job.description}</p>
 
-        <div className="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-800">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-3">
             {job.location && (
-              <span className="flex items-center gap-1">
-                <span>📍</span> {job.location}
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-blue-500" /> {job.location}
               </span>
             )}
             {job.contactName && (
-              <span className="flex items-center gap-1">
-                <span>👤</span> {job.contactName}
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-slate-300" /> {job.contactName}
               </span>
             )}
           </div>

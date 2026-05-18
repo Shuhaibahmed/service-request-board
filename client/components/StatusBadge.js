@@ -7,9 +7,6 @@ export default function StatusBadge({ status }) {
 
   return (
     <span className={classes[status] || "badge-open"}>
-      {status === "Open" && "● "}
-      {status === "In Progress" && "◐ "}
-      {status === "Closed" && "○ "}
       {status}
     </span>
   );
